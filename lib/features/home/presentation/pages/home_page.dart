@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:lottie/lottie.dart';
-import 'package:native_channel/features/home/repo/home_repo.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../bloc/home_bloc.dart';
+import '../widgets/animated_battery.dart';
+import '../widgets/animated_button.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -12,7 +14,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  static const platform = MethodChannel('samples.flutter.dev/battery');
   late AnimationController _animationController;
   late Animation<double> sizeTween;
   String _batteryLevel = 'Tap to get Battery Level';
@@ -31,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage>
     });
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 400),
     );
     sizeTween = Tween<double>(begin: 0, end: 1).animate(_animationController);
   }
@@ -52,66 +53,29 @@ class _MyHomePageState extends State<MyHomePage>
         title: Text("Battery App"),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(height: 90),
-            ScaleTransition(
-              scale: sizeTween,
-              child: SizedBox(
-                height: 400,
-                child: LottieBuilder.asset("assets/batteryAnimation.json"),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              _batteryLevel,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            SizedBox(height: 20),
-            AnimatedContainer(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.inversePrimary,
-                borderRadius: BorderRadius.circular(
-                  20,
-                ), // Adjust radius as needed
-              ),
-              duration: Duration(milliseconds: 200),
-              height: height,
-              width: width,
-              child: TextButton(
-                onPressed: () async {
-                  String batteryLevel = await HomeRepo.getBatteryLevel();
-                  print(batteryLevel);
-                  _animationController.forward();
-                },
-                child: Text(
-                  "Get Battery Level",
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.normal,
-                    fontSize: 20,
-                  ),
+        child: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(height: 90),
+                AnimatedBattery(sizeTween: sizeTween),
+                SizedBox(height: 20),
+                Text(
+                  state is! BatteryLoaded ? _batteryLevel : state.batteryLevel,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
-              ),
-            ),
-          ],
+                SizedBox(height: 20),
+                AnimatedButton(
+                  height: height,
+                  width: width,
+                  animationController: _animationController,
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
-
-  // Future<void> _getBatteryLevel() async {
-  //   String batteryLevel;
-  //   try {
-  //     final result = await platform.invokeMethod<int>('getBatteryLevel');
-  //     batteryLevel = 'Battery level at $result % .';
-  //   } on PlatformException catch (e) {
-  //     batteryLevel = "Failed to get battery level: '${e.message}'.";
-  //   }
-  //
-  //   setState(() {
-  //     _batteryLevel = batteryLevel;
-  //   });
-  // }
 }
