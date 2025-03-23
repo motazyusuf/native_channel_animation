@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,18 +25,44 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
   static const platform = MethodChannel('samples.flutter.dev/battery');
+  late AnimationController _animationController;
+  late Animation<double> sizeTween;
   String _batteryLevel = 'Tap to get Battery Level';
+  double height = 0;
+  double width = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Delay animation slightly to ensure it happens on screen load
+    Future.delayed(Duration(milliseconds: 300), () {
+      setState(() {
+        width = 200;
+        height = 60;
+      });
+    });
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+    sizeTween = Tween<double>(begin: 0, end: 1).animate(_animationController);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -44,22 +71,57 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 100,),
+            FadeTransition(
+              opacity: sizeTween,
+              child: ScaleTransition(
+                scale: sizeTween,
+                child: SizedBox(
+                  height: 400,
+                  child: LottieBuilder.asset("assets/batteryAnimation.json"),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
             Text(
               _batteryLevel,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            SizedBox(
+                height: 20),
+            AnimatedContainer(
+              decoration: BoxDecoration(
+                color: Theme
+                    .of(context)
+                    .colorScheme
+                    .inversePrimary,
+                borderRadius: BorderRadius.circular(
+                  20,
+                ), // Adjust radius as needed
+              ),
+              duration: Duration(milliseconds: 200),
+              height: height,
+              width: width,
+              child: TextButton(
+                onPressed: () async {
+                  await _getBatteryLevel();
+                  _animationController.forward();
+                },
+                child: Text(
+                  "Get Battery Level",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await _getBatteryLevel();
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
