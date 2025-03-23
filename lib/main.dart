@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage>
   void initState() {
     super.initState();
     // Delay animation slightly to ensure it happens on screen load
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(Duration(milliseconds: 50), () {
       setState(() {
         width = 200;
         height = 60;
@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage>
     });
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 200),
     );
     sizeTween = Tween<double>(begin: 0, end: 1).animate(_animationController);
   }
@@ -73,15 +73,12 @@ class _MyHomePageState extends State<MyHomePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(height: 100,),
-            FadeTransition(
-              opacity: sizeTween,
-              child: ScaleTransition(
-                scale: sizeTween,
-                child: SizedBox(
-                  height: 400,
-                  child: LottieBuilder.asset("assets/batteryAnimation.json"),
-                ),
+            SizedBox(height: 90,),
+            ScaleTransition(
+              scale: sizeTween,
+              child: SizedBox(
+                height: 400,
+                child: LottieBuilder.asset("assets/batteryAnimation.json"),
               ),
             ),
             SizedBox(height: 20),
