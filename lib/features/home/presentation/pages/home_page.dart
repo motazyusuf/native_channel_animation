@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:native_channel/features/home/repo/home_repo.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -81,7 +81,8 @@ class _MyHomePageState extends State<MyHomePage>
               width: width,
               child: TextButton(
                 onPressed: () async {
-                  await _getBatteryLevel();
+                  String batteryLevel = await HomeRepo.getBatteryLevel();
+                  print(batteryLevel);
                   _animationController.forward();
                 },
                 child: Text(
@@ -100,17 +101,17 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  Future<void> _getBatteryLevel() async {
-    String batteryLevel;
-    try {
-      final result = await platform.invokeMethod<int>('getBatteryLevel');
-      batteryLevel = 'Battery level at $result % .';
-    } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
-    }
-
-    setState(() {
-      _batteryLevel = batteryLevel;
-    });
-  }
+  // Future<void> _getBatteryLevel() async {
+  //   String batteryLevel;
+  //   try {
+  //     final result = await platform.invokeMethod<int>('getBatteryLevel');
+  //     batteryLevel = 'Battery level at $result % .';
+  //   } on PlatformException catch (e) {
+  //     batteryLevel = "Failed to get battery level: '${e.message}'.";
+  //   }
+  //
+  //   setState(() {
+  //     _batteryLevel = batteryLevel;
+  //   });
+  // }
 }
